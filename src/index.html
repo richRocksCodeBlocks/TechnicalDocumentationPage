@@ -1,0 +1,370 @@
+<!doctype html>
+<html class="no-js" lang="eng">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Technical Documentation  - Gulp.js</title>
+  <meta name="description" content="Gulp Documentation">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Damion|Roboto');
+  </style>
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+<!--[if lte IE 9]>
+<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade
+  your browser</a> to improve your experience and security.</p>
+<![endif]-->
+<button id="shownav" onclick="showNav()" class="hidden"><i class="material-icons">menu</i></button>
+<nav class="" id="navbar">
+  <header>Gulp Documentation</header>
+
+  <ul>
+    <li><a class="active" href="#home">Home</a></li>
+    <li><a class="nav-link" href="#What_is_gulp">What is gulp</a></li>
+    <li><a class="nav-link" href="#Installation">Installation</a></li>
+    <li><a class="nav-link" href="#Sample_gulpfile.js">Sample gulpfile.js</a></li>
+    <li><a class="nav-link" href="#Use_latest_JavaScript_version">Use latest JavaScript version</a></li>
+    <li><a class="nav-link" href="#Incremental_Builds">Incremental Builds</a></li>
+    <li><a class="nav-link" href="#Getting_Started">Getting Started</a></li>
+    <li><a class="nav-link" href="#How_do_I_use_these_things">How do I use these things</a></li>
+    <li><a class="nav-link" href="#Where_do_I_go_now">Where do I go now</a></li>
+  </ul>
+</nav>
+<main id="main-doc">
+  <div class="text-centered" id="home">
+    <h1>Gulp</h1>
+    <em>The streaming build system</em>
+  </div>
+  <section class="main-section" id="What_is_gulp">
+    <header>What is gulp</header>
+    <ul>
+      <li><b>Automation</b> - gulp is a toolkit that helps you automate painful or time-consuming tasks in your
+        development workflow.
+      </li>
+      <li><b>Platform-agnostic</b> - Integrations are built into all major IDEs and people are using gulp with PHP,
+        .NET, Node.js, Java, and other platforms.
+      </li>
+      <li><b>Strong Ecosystem</b> - Use npm modules to do anything you want + over 2000 curated plugins for streaming
+        file transformations
+      </li>
+      <li><b>Simple</b> - By providing only a minimal API surface, gulp is easy to learn and simple to use</li>
+    </ul>
+  </section>
+  <section class="main-section" id="Installation">
+    <header>Installation</header>
+    <p>There are a few ways to install:</p>
+    <ul>
+      <li>gulp v4.0.0 - <code>npm install gulp@next</code></li>
+      <li>gulp v4.0.0-alpha.3 - <code>npm install gulpjs/gulp#v4.0.0-alpha.3</code></li>
+      <li>gulp v3.9.1 - <code>npm install gulp</code></li>
+    </ul>
+  </section>
+  <section class="main-section" id="Sample_gulpfile.js">
+    <header>Sample gulpfile.js</header>
+    <p>This file will give you a taste of what gulp does.</p>
+    <pre>
+<code>
+var gulp = require('gulp');
+var less = require('gulp-less');
+var babel = require('gulp-babel');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
+var cleanCSS = require('gulp-clean-css');
+var del = require('del');
+
+var paths = {
+  styles: {
+    src: 'src/styles/**/*.less',
+    dest: 'assets/styles/'
+  },
+  scripts: {
+    src: 'src/scripts/**/*.js',
+    dest: 'assets/scripts/'
+  }
+};
+
+/* Not all tasks need to use streams, a gulpfile is just another node program
+ * and you can use all packages available on npm, but it must return either a
+ * Promise, a Stream or take a callback and call it
+ */
+function clean() {
+  // You can use multiple globbing patterns as you would with `gulp.src`,
+  // for example if you are using del 2.0 or above, return its promise
+  return del([ 'assets' ]);
+}
+
+/*
+ * Define our tasks using plain functions
+ */
+function styles() {
+  return gulp.src(paths.styles.src)
+    .pipe(less())
+    .pipe(cleanCSS())
+    // pass in options to the stream
+    .pipe(rename({
+      basename: 'main',
+      suffix: '.min'
+    }))
+    .pipe(gulp.dest(paths.styles.dest));
+}
+
+function scripts() {
+  return gulp.src(paths.scripts.src, { sourcemaps: true })
+    .pipe(babel())
+    .pipe(uglify())
+    .pipe(concat('main.min.js'))
+    .pipe(gulp.dest(paths.scripts.dest));
+}
+
+function watch() {
+  gulp.watch(paths.scripts.src, scripts);
+  gulp.watch(paths.styles.src, styles);
+}
+
+/*
+ * You can use CommonJS `exports` module notation to declare tasks
+ */
+exports.clean = clean;
+exports.styles = styles;
+exports.scripts = scripts;
+exports.watch = watch;
+
+/*
+ * Specify if tasks run in series or parallel using `gulp.series` and `gulp.parallel`
+ */
+var build = gulp.series(clean, gulp.parallel(styles, scripts));
+
+/*
+ * You can still use `gulp.task` to expose tasks
+ */
+gulp.task('build', build);
+
+/*
+ * Define default task that can be called by just running `gulp` from cli
+ */
+gulp.task('default', build);
+</code>
+</pre>
+  </section>
+  <section class="main-section" id="Use_latest_JavaScript_version">
+    <header>Use latest JavaScript version</header>
+    <p>Node already supports a lot of ES2015, to avoid compatibility problem we suggest to install Babel and rename your
+      <code>gulpfile.js</code> as <code>gulpfile.babel.js</code>.</p>
+    <pre><code>npm install --save-dev babel-register babel-preset-es2015</code></pre>
+    <p>Then create a .babelrc file with the preset configuration.</p>
+    <pre><code>{
+  "presets": [ "es2015" ]
+}</code></pre>
+    <p>And here's the same sample from above written in ES2015.</p>
+    <pre><code>import gulp from 'gulp';
+import less from 'gulp-less';
+import babel from 'gulp-babel';
+import concat from 'gulp-concat';
+import uglify from 'gulp-uglify';
+import rename from 'gulp-rename';
+import cleanCSS from 'gulp-clean-css';
+import del from 'del';
+
+const paths = {
+  styles: {
+    src: 'src/styles/**/*.less',
+    dest: 'assets/styles/'
+  },
+  scripts: {
+    src: 'src/scripts/**/*.js',
+    dest: 'assets/scripts/'
+  }
+};
+
+/*
+ * For small tasks you can export arrow functions
+ */
+export const clean = () => del([ 'assets' ]);
+
+/*
+ * You can also declare named functions and export them as tasks
+ */
+export function styles() {
+  return gulp.src(paths.styles.src)
+    .pipe(less())
+    .pipe(cleanCSS())
+    // pass in options to the stream
+    .pipe(rename({
+      basename: 'main',
+      suffix: '.min'
+    }))
+    .pipe(gulp.dest(paths.styles.dest));
+}
+
+export function scripts() {
+  return gulp.src(paths.scripts.src, { sourcemaps: true })
+    .pipe(babel())
+    .pipe(uglify())
+    .pipe(concat('main.min.js'))
+    .pipe(gulp.dest(paths.scripts.dest));
+}
+
+ /*
+  * You could even use `export as` to rename exported tasks
+  */
+function watchFiles() {
+  gulp.watch(paths.scripts.src, scripts);
+  gulp.watch(paths.styles.src, styles);
+}
+export { watchFiles as watch };
+
+/*
+ * You can still use `gulp.task`
+ * for example to set task names that would otherwise be invalid
+ */
+const build = gulp.series(clean, gulp.parallel(styles, scripts));
+gulp.task('build', build);
+
+/*
+ * Export a default task
+ */
+export default build;</code></pre>
+
+  </section>
+  <section class="main-section" id="Incremental_Builds">
+    <header>Incremental Builds</header>
+    <p>You can filter out unchanged files between runs of a task using the <code>gulp.src</code> function's
+      <code>since</code> option and <code>gulp.lastRun</code> :</p>
+    <pre><code>const paths = {
+  ...
+  images: {
+    src: 'src/images/**/*.{jpg,jpeg,png}',
+    dest: 'build/img/'
+  }
+}
+
+function images() {
+  return gulp.src(paths.images.src, {since: gulp.lastRun(images)})
+    .pipe(imagemin({optimizationLevel: 5}))
+    .pipe(gulp.dest(paths.images.dest));
+}
+
+function watch() {
+  gulp.watch(paths.images.src, images);
+}</code></pre>
+    <p>Task run times are saved in memory and are lost when gulp exits. It will only save time during the watch task
+      when running the images task for a second time.
+      <br>
+      If you want to compare modification time between files instead, we recommend these plugins:</p>
+    <ul>
+      <li>gulp-changed;</li>
+      <li>or gulp-newer - supports many:1 source:dest.</li>
+    </ul>
+    <p>gulp-newer example:</p>
+    <pre><code>function images() {
+  var dest = 'build/img';
+  return gulp.src(paths.images)
+    .pipe(newer(dest))  // pass through newer images only
+    .pipe(imagemin({optimizationLevel: 5}))
+    .pipe(gulp.dest(dest));
+}</code></pre>
+    <p>If you can't simply filter out unchanged files, but need them in a later phase of the stream, we recommend these
+      plugins:</p>
+    <ul>
+      <li>gulp-cached - in-memory file cache, not for operation on sets of files</li>
+      <li>gulp-remember - pairs nicely with gulp-cached</li>
+    </ul>
+    <p>gulp-remember example:</p>
+    <pre><code>function scripts() {
+  return gulp.src(scriptsGlob)
+    .pipe(cache('scripts'))    // only pass through changed files
+    .pipe(header('(function () {')) // do special things to the changed files...
+    .pipe(footer('})();'))     // for example,
+                               // add a simple module wrap to each file
+    .pipe(remember('scripts')) // add back all files to the stream
+    .pipe(concat('app.js'))    // do things that require all files
+    .pipe(gulp.dest('public/'))
+}</code></pre>
+
+  </section>
+  <section class="main-section" id="Getting_Started">
+    <header>
+      Getting Started
+    </header>
+    <p><em>
+      If you've previously installed gulp globally, run npm rm --global gulp before following these instructions. For
+      more information, read this <a href="https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467"
+                                     target="_blank">Sip</a>.</em></p>
+    <p><b>Check for Node and npm</b></p>
+    <pre><code>node --version</code></pre>
+    <pre><code>npm --version</code></pre>
+    <p><b>Install the gulp command</b></p>
+    <pre><code>npm install --global gulp-cli</code></pre>
+    <p><b>Create a package.json in your project directory</b></p>
+    <p>If you don't have a package.json, create one. If you need help, run an npm init which will walk you through
+      giving it a name, version, description, etc.</p>
+    <p><b>Install gulp in your devDependencies</b></p>
+    <p>Run this command in your project directory:</p>
+    <pre><code>npm install --save-dev gulp@next</code></pre>
+    <p><b>Create a gulpfile</b></p>
+    <p>In your project directory, create a file named <code>gulpfile.js</code> in your project root with these contents:
+    </p>
+    <pre><code>var gulp = require('gulp');
+
+gulp.task('default', defaultTask);
+
+function defaultTask(done) {
+  // place code for your default task here
+  done();
+}</code></pre>
+    <p><b>Test it out</b></p>
+    <p>Run the gulp command in your project directory:</p>
+    <pre><code>gulp</code></pre>
+    <p>To run multiple tasks, you can use <code>gulp &lt;task&gt; &lt;othertask&gt;</code>.</p>
+    <p><b>Result</b></p>
+    <p>Voila! The default task will run and do nothing.</p>
+    <pre><code>Using gulpfile ~/my-project/gulpfile.js
+[11:15:51] Starting 'default'...
+[11:15:51] Finished 'default' after 103 μs</code></pre>
+  </section>
+  <section class="main-section" id="How_do_I_use_these_things">
+    <header>How do I use these things</header>
+    <p><b>src, .watch, .dest, .parallel, .series, CLI args </b></p>
+    <p>For API specific documentation, you can check out the <a
+      href="https://github.com/richRocksCodeBlocks/gulp/blob/master/docs/API.md" target="_blank">documentation for
+      that</a>.</p>
+  </section>
+  <section class="main-section" id="Where_do_I_go_now">
+    <header>
+      Where do I go now
+    </header>
+    <ul>
+      <li><a href="https://github.com/richRocksCodeBlocks/gulp/blob/master/docs/API.md" target="_blank">API
+        Documentation</a> - The programming interface, defined
+      </li>
+      <li><a href="https://github.com/richRocksCodeBlocks/gulp/blob/master/docs/recipes" target="_blank">Recipes</a> -
+        Specific examples from the community
+      </li>
+      <li><a href="https://travismaynard.com/writing/getting-started-with-gulp" target="_blank">In Depth Help</a> - A
+        tutorial from the guy who wrote the book
+      </li>
+      <li><a href="https://gulpjs.com/plugins/" target="_blank">Plugins</a> - Building blocks for your gulp file</li>
+    </ul>
+  </section>
+
+</main>
+
+<script src="js/vendor/modernizr-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="js/vendor/jquery-3.3.1.min.js"><\/script>')</script>
+<script src="js/plugins.js"></script>
+<script src="js/main.js"></script>
+<script src="https://www.google-analytics.com/analytics.js" async defer></script>
+<script src="https://gitcdn.link/repo/freeCodeCamp/testable-projects-fcc/master/build/bundle.js"></script>
+</body>
+
+</html>
